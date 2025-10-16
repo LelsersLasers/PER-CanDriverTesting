@@ -1,0 +1,8 @@
+[package]
+name = "slcan_testing"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+slcan = "0.1.3"
+serial = "0.4"
