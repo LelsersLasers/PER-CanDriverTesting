@@ -21,6 +21,12 @@ fn main() -> io::Result<()> {
     port.set_timeout(Duration::from_millis(100))?;
     println!("Serial port configured");
 
+    println!("Sending SLCAN commands:");
+    // port.write_all("E1\r".as_bytes())?; // Enable echo
+    // port.write("S6\r".as_bytes())?; // Set bitrate to 500 Kbit/s
+    // port.write("O\r".as_bytes())?;  // Open CAN channel
+
+
     let mut buf = [0u8; 64]; // read in up to 64 bytes at a time
 
     println!("Listening for raw serial data...");

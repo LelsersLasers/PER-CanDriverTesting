@@ -1,48 +1,24 @@
-use serial::prelude::*;
-use slcan::{BitRate, CanSocket};
-use std::io;
-use std::time::Duration;
+use slcan_fd::{tokio::CanSocket, NominalBitRate, OperatingMode};
+use tokio_serial::SerialPortBuilderExt;
 
-fn main() -> io::Result<()> {
-    println!("Starting...");
+#[tokio::main]
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let mut port = tokio_serial::new("/dev/ttyACM1", 115_200).open_native_async()?;
 
-    let port_name = "/dev/ttyACM1"; // MARK
+    #[cfg(unix)]
+    port.set_exclusive(false)
+        .expect("Unable to set serial port exclusive to false");
 
-    // Open serial port
-    let mut port = serial::open(port_name)?;
-    println!("Connected to serial port {}", port_name);
-    port.reconfigure(&|settings| {
-        settings.set_baud_rate(serial::Baud115200)?; // MARK
-        settings.set_char_size(serial::Bits8);
-        settings.set_parity(serial::ParityNone);
-        settings.set_stop_bits(serial::Stop1);
-        settings.set_flow_control(serial::FlowNone);
-        Ok(())
-    })?;
-    port.set_timeout(Duration::from_millis(200))?;
-    println!("Serial port configured");
+    let mut can = CanSocket::new(port);
 
-    // Create the CAN socket
-    let mut can_socket = CanSocket::new(port);
+    can.close().await?;
+    can.set_operating_mode(OperatingMode::Silent).await?;
+    can.open(NominalBitRate::Rate500Kbit).await?;
 
-    // Set bitrate (adjust to your CAN network’s bitrate)
-    can_socket.open(BitRate::Setup500Kbit)?;
-    println!("Connected to CAN");
-
-    // Main loop: continuously read frames
     loop {
-        match can_socket.read() {
-            Ok(frame) => println!("{}", frame),
-            Err(ref e) if e.kind() == io::ErrorKind::WouldBlock => {
-                // No frame available yet, just continue
-            }
-            Err(e) => {
-                eprintln!("Error reading frame: {:?}", e);
-                break;
-            }
+        match can.read().await {
+            Ok(frame) => println!("{:?}", frame),
+            Err(e) => eprintln!("{:?}", e),
         }
     }
-
-    can_socket.close()?;
-    Ok(())
 }

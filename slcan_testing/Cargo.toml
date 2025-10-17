@@ -4,5 +4,10 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
-slcan = "0.1.3"
-serial = "0.4"
+# slcan = "0.1.3"
+# serial = "0.4"
+# serialport = "4.8.1"
+slcan_fd = { git = "https://github.com/adom-inc/slcan_fd.git" }
+tokio = { version = "1.48.0", features = ["full"] }
+tokio-macros = { version = "2.5.0" }
+tokio-serial = "5.4.5"
