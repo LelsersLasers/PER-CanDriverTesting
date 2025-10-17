@@ -6,20 +6,20 @@ use std::time::Duration;
 fn main() -> io::Result<()> {
     println!("Starting...");
 
-    let port_name = "/dev/ttyUSB0"; // MARK
+    let port_name = "/dev/ttyACM1"; // MARK
 
     // Open serial port
     let mut port = serial::open(port_name)?;
     println!("Connected to serial port {}", port_name);
     port.reconfigure(&|settings| {
-        settings.set_baud_rate(serial::Baud9600)?; // MARK
+        settings.set_baud_rate(serial::Baud115200)?; // MARK
         settings.set_char_size(serial::Bits8);
         settings.set_parity(serial::ParityNone);
         settings.set_stop_bits(serial::Stop1);
         settings.set_flow_control(serial::FlowNone);
         Ok(())
     })?;
-    port.set_timeout(Duration::from_millis(100))?;
+    port.set_timeout(Duration::from_millis(200))?;
     println!("Serial port configured");
 
     // Create the CAN socket
