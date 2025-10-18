@@ -15,6 +15,11 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     can.set_operating_mode(OperatingMode::Silent).await?;
     can.open(NominalBitRate::Rate500Kbit).await?;
 
+    let frame = slcan_fd::Can2Frame::new_data(
+        slcan_fd::StandardId::new(0x123).unwrap(),
+         &[1, 2, 3, 4, 5, 6, 7, 8]).unwrap();
+    can.send(frame).await?;
+
     loop {
         match can.read().await {
             Ok(frame) => println!("{:?}", frame),
